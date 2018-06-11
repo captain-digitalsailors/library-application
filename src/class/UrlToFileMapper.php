@@ -235,6 +235,7 @@ class UrlToFileMapper implements IUrlMapper
         }
 
         if ($result == '') {
+            error_log('Could not find mapping in mapping.gen.inc.php (from mapping.xml) for URL (not taking parseParameter into account): ' . $this->getModifiedUrl($request));
             echo '404';
             die;
         }
@@ -391,6 +392,38 @@ class UrlToFileMapper implements IUrlMapper
 //        var_dump($result);
         // return
         return $result;
+    }
+
+    /**
+     * @param bool    $supportParseParameter
+     * @param Request $request
+     *
+     * @return int
+     */
+    private function getModifiedUrl(Request $request = null)
+    {
+        $url = '';
+        if ($request->Input->Subdomains != '') {
+            $url .= $request->Input->Subdomains.'.';
+        }
+        //$path .= $request->Input->Domain;
+        $url .= $request->Input->Host;
+        if ($request->Input->Port != '') {
+            $url .= ':'.$request->Input->Port;
+        }
+
+
+        $path = '';
+
+
+        if ($request->Input->Path != '') {
+            $path .= $request->Input->Path;
+        }
+
+        $path = trim($path, "\t\n\r\0\x0B/");
+        $url .= '/'.$path;
+        $url = trim($url, "\t\n\r\0\x0B/");
+        return $url;
     }
 
     /**
